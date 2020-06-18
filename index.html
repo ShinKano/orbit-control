@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.101.1/examples/js/controls/OrbitControls.js"></script>
-  <script>
+  <script type="module">
     // ページの読み込みを待つ
     window.addEventListener('load', init);
 
@@ -28,7 +28,7 @@
       // シーンを作成
       const scene = new THREE.Scene();
       scene.background = new THREE.Color( 0xcccccc );
-      scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
+      // scene.fog = new THREE.FogExp2( 0xcccccc, 0.002 );
 
 
       // カメラを作成 (視野角, 画面のアスペクト比, カメラに映る最短距離, カメラに映る最遠距離)
@@ -42,23 +42,55 @@
       controls.minDistance = 1;
 			controls.maxDistance = 800;
       controls.maxPolarAngle = Math.PI / 1.4;
+      controls.enableZoom = true;
+      controls.autoRotate = false;
 
 
-      // 箱を作成
-      var geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
-			var material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
-      for ( var i = 0; i < 500; i ++ ) {
-        var mesh = new THREE.Mesh( geometry, material );
-        mesh.position.x = Math.random() * 1600 - 800;
-        mesh.position.y = 0;
-        mesh.position.z = Math.random() * 1600 - 800;
-        mesh.updateMatrix();
-        mesh.matrixAutoUpdate = false;
-        scene.add( mesh );
 
+
+      var SEPARATION = 5, AMOUNTX = 50, AMOUNTY = 50;
+      var numParticles = AMOUNTX * AMOUNTY;
+
+      var positions = new Float32Array( numParticles * 3 );
+      var scales = new Float32Array( numParticles );
+
+      var i = 0, j = 0;
+      for ( var ix = 0; ix < AMOUNTX; ix ++ ) {
+        for ( var iy = 0; iy < AMOUNTY; iy ++ ) {
+          positions[ i ] = ix * SEPARATION - ( ( AMOUNTX * SEPARATION ) / 2 ); // x
+          positions[ i + 1 ] = 0; // y
+          positions[ i + 2 ] = iy * SEPARATION - ( ( AMOUNTY * SEPARATION ) / 2 ); // z
+
+          scales[ j ] = 1;
+
+          i += 3;
+          j ++;
+        }
       }
 
+      var geometry = new THREE.BufferGeometry();
+      geometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
+      geometry.addAttribute( 'scale', new THREE.BufferAttribute( scales, 100 ) );
+
+      var material = new THREE.PointsMaterial( { color: 0x555555 } );
+      var points = new THREE.Points( geometry, material );
+      // 箱を作成
+      // var geometry = new THREE.CylinderBufferGeometry( 0, 10, 30, 4, 1 );
+			// var material = new THREE.MeshPhongMaterial( { color: 0xffffff, flatShading: true } );
+
+      // for ( var i = 0; i < 500; i ++ ) {
+      //   var mesh = new THREE.Mesh( geometry, material );
+      //   mesh.position.x = i;
+      //   mesh.position.y = 0;
+      //   mesh.position.z = i * 10;
+      //   mesh.updateMatrix();
+      //   mesh.matrixAutoUpdate = false;
+      //   scene.add( mesh );
+
+      // }
+
       // lights
+      scene.add( points );
 
       var light = new THREE.DirectionalLight( 0xffffff );
       light.position.set( 1, 1, 1 );
