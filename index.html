@@ -72,6 +72,9 @@
 			scene.add( light );
       
 
+      // 画面サイズの変更に対応
+      window.addEventListener( 'resize', onWindowResize, false );
+
       tick();
 
       // 毎フレーム時に実行されるループイベントです
@@ -88,7 +91,6 @@
 				camera.updateProjectionMatrix();
 
 				renderer.setSize( window.innerWidth, window.innerHeight );
-
 			}
     }
   </script>
